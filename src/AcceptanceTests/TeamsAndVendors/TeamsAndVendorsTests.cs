@@ -184,7 +184,7 @@ public class TeamsAndVendorsTests : AcceptanceTestBase
 
         // Navigate to Teams & Vendors page
         await Page.GotoAsync("/admin/teams");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         // Verify team is displayed
         await Expect(Page.GetByText(teamName, new() { Exact = true })).ToBeVisibleAsync();
@@ -215,7 +215,7 @@ public class TeamsAndVendorsTests : AcceptanceTestBase
 
         // Navigate to Teams & Vendors page
         await Page.GotoAsync("/admin/teams");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         // Verify team is displayed and has member avatars
         var teamCard = Page.Locator($"[data-testid*='TeamCard'][data-testid*='{teamResult.Id}']");
@@ -249,7 +249,7 @@ public class TeamsAndVendorsTests : AcceptanceTestBase
 
         // Navigate to Teams & Vendors page
         await Page.GotoAsync("/admin/teams");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         // Verify vendor is displayed
         await Expect(Page.GetByText(vendorName, new() { Exact = true })).ToBeVisibleAsync();
@@ -275,7 +275,7 @@ public class TeamsAndVendorsTests : AcceptanceTestBase
 
         // Navigate to Teams & Vendors page
         await Page.GotoAsync("/admin/teams");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         // Find the vendor card
         var vendorCard = Page.Locator($"[data-testid*='VendorCard'][data-testid*='{vendorResult.Id}']");
@@ -309,7 +309,7 @@ public class TeamsAndVendorsTests : AcceptanceTestBase
 
         // Navigate to Teams & Vendors page
         await Page.GotoAsync("/admin/teams");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         // Find the vendor card
         var vendorCard = Page.Locator($"[data-testid*='VendorCard'][data-testid*='{vendorResult.Id}']");
@@ -338,7 +338,7 @@ public class TeamsAndVendorsTests : AcceptanceTestBase
 
         // Navigate to Teams & Vendors page
         await Page.GotoAsync("/admin/teams");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         // Find the email link in the vendor card
         var emailLink = Page.Locator($"[data-testid*='VendorEmail'][data-testid*='{vendorResult.Id}'] a");
