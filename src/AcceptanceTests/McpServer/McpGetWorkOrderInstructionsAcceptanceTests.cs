@@ -105,7 +105,8 @@ public class McpGetWorkOrderInstructionsAcceptanceTests : AcceptanceTestBase
 
         var creator = RequiredString(live, "Creator");
         var creatorGroup = Page.Locator(".form-group").Filter(new LocatorFilterOptions { HasText = "Creator" });
-        await Expect(creatorGroup.GetByText(creator, new LocatorGetByTextOptions { Exact = true }))
+        // The creator is the group's read-only value; the assignee select in the same group lists the name too.
+        await Expect(creatorGroup.Locator(".value").Filter(new LocatorFilterOptions { HasText = creator }).First)
             .ToBeVisibleAsync();
 
         var createdDate = live.GetProperty("CreatedDate").GetDateTime();

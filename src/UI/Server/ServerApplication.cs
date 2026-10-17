@@ -32,7 +32,10 @@ public static class ServerApplication
     public static async Task RunAsync(string[] args)
     {
         var app = BuildApplication(args);
-        await app.Services.GetRequiredService<HealthCheckService>().CheckHealthAsync();
+        // The first health check warms the dependencies, but it must not hold the listener back: a serverless
+        // database that resumes from auto-pause takes longer than a scale-from-zero request waits.
+        app.Lifetime.ApplicationStarted.Register(() =>
+            _ = Task.Run(() => app.Services.GetRequiredService<HealthCheckService>().CheckHealthAsync()));
         await app.RunAsync();
     }
 
@@ -41,6 +44,9 @@ public static class ServerApplication
         Action<WebApplicationBuilder>? configureBuilder = null)
     {
         var builder = WebApplication.CreateBuilder(args);
+        // Start the web server alongside the message endpoint, so the app answers while the endpoint still waits
+        // for its database (a serverless database resuming from auto-pause).
+        builder.Services.Configure<HostOptions>(options => options.ServicesStartConcurrently = true);
         ConfigureWebHost(builder);
         RegisterServices(builder);
         configureBuilder?.Invoke(builder);
