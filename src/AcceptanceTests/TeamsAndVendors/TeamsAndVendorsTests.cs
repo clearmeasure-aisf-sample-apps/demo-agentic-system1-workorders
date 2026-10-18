@@ -188,7 +188,9 @@ public class TeamsAndVendorsTests : AcceptanceTestBase
 
         // Verify team is displayed
         await Expect(Page.GetByText(teamName, new() { Exact = true })).ToBeVisibleAsync();
-        await Expect(Page.GetByText("A test team for acceptance testing")).ToBeVisibleAsync();
+        // Other tests (and retries) create teams with the same description: look inside this team's card.
+        var teamCard = Page.Locator($"[data-testid*='TeamCard'][data-testid*='{teamResult.Id}']");
+        await Expect(teamCard.GetByText("A test team for acceptance testing")).ToBeVisibleAsync();
     }
 
     [Test]
@@ -253,8 +255,10 @@ public class TeamsAndVendorsTests : AcceptanceTestBase
 
         // Verify vendor is displayed
         await Expect(Page.GetByText(vendorName, new() { Exact = true })).ToBeVisibleAsync();
-        await Expect(Page.GetByText("Plumbing", new() { Exact = true })).ToBeVisibleAsync();
-        await Expect(Page.GetByText("John Smith")).ToBeVisibleAsync();
+        // Other tests (and retries) create vendors with the same trade and contact: look inside this vendor's card.
+        var vendorCard = Page.Locator($"[data-testid*='VendorCard'][data-testid*='{vendorResult.Id}']");
+        await Expect(vendorCard.GetByText("Plumbing", new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(vendorCard.GetByText("John Smith")).ToBeVisibleAsync();
     }
 
     [Test]
