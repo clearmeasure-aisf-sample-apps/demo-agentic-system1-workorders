@@ -86,6 +86,10 @@ public partial class WorkOrderSearch : AppComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        // The URL state is taken before the first await: a filter chosen while the page is still loading
+        // must not be overwritten by the URL afterwards (the first parameters arrive once loading ends).
+        _lastUrlState = IncomingState();
+        SetState(_lastUrlState);
         StatusOptions = WorkOrderStatus.GetAllItems().Select(s => new SelectListItem(s.Key, s.FriendlyName)).ToList();
         // Who is signed in comes first: "Assigned to me" filters by it.
         _currentUserName = (await AuthStateProvider.GetAuthenticationStateAsync()).User.Identity?.Name;
@@ -96,6 +100,10 @@ public partial class WorkOrderSearch : AppComponentBase
         _currentUser = await UserSession.GetCurrentUserAsync();
         _canCreate = _currentUser?.CanCreateWorkOrder() == true;
         await LoadSummaryAsync();
+        if (_searchVersion == 0)
+        {
+            await ApplyStateAsync(WithSessionAssignedToMe(_lastUrlState));
+        }
     }
 
     protected override async Task OnParametersSetAsync()
@@ -141,6 +149,12 @@ public partial class WorkOrderSearch : AppComponentBase
 
     private async Task ApplyStateAsync(WorkOrderSearchUrlState state)
     {
+        SetState(state);
+        await SearchWorkOrders();
+    }
+
+    private void SetState(WorkOrderSearchUrlState state)
+    {
         _state = state;
         _selection.Clear();
         _openRowMenu = null;
@@ -152,7 +166,6 @@ public partial class WorkOrderSearch : AppComponentBase
         Model.Filters.WaitingOnVendorOnly = state.WaitingOnVendorOnly;
         Model.Filters.Priority = state.Priority?.ToString();
         Model.Filters.Building = state.Building;
-        await SearchWorkOrders();
     }
 
     /// <summary>Applies a state the user chose, searches, and records it in the URL (replace, no history entry).</summary>
