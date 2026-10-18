@@ -253,7 +253,22 @@ public class McpListWorkOrdersAcceptanceTests : AcceptanceTestBase
         while (await next.IsEnabledAsync())
         {
             var firstLink = await FirstLinkTestId();
-            await next.ClickAsync();
+            try
+            {
+                await next.ClickAsync(new LocatorClickOptions { Timeout = 5000 });
+            }
+            catch (TimeoutException)
+            {
+                if (await next.IsEnabledAsync())
+                {
+                    throw;
+                }
+
+                // The results re-rendered (a sibling test changed the data) and this is now the last page;
+                // the caller compares against MCP again and reloads if they differ.
+                break;
+            }
+
             await Expect(Page.Locator($"[data-testid^='{WorkOrderSearch.Elements.WorkOrderLink}']").First)
                 .Not.ToHaveAttributeAsync("data-testid", firstLink!);
             numbers.UnionWith(await NumbersOnCurrentPage());
