@@ -292,16 +292,11 @@ public class McpListWorkOrdersAcceptanceTests : AcceptanceTestBase
 
     private async Task<IEnumerable<string>> NumbersOnCurrentPage()
     {
-        var links = Page.Locator($"[data-testid^='{WorkOrderSearch.Elements.WorkOrderLink}']");
+        // One read of every row: the table may re-render between a count and reading row n.
         var prefixLength = nameof(WorkOrderSearch.Elements.WorkOrderLink).Length;
-        var numbers = new List<string>();
-        for (var index = 0; index < await links.CountAsync(); index++)
-        {
-            var testId = await links.Nth(index).GetAttributeAsync("data-testid");
-            numbers.Add(testId![prefixLength..]);
-        }
-
-        return numbers;
+        var testIds = await Page.Locator($"[data-testid^='{WorkOrderSearch.Elements.WorkOrderLink}']")
+            .EvaluateAllAsync<string[]>("links => links.map(l => l.getAttribute('data-testid'))");
+        return testIds.Select(testId => testId[prefixLength..]).ToList();
     }
 
     private async Task LoginAsTlovejoyAsync()
