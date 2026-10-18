@@ -2,6 +2,7 @@ using System.Text.Json;
 using ClearMeasure.Bootcamp.LlmGateway;
 using ClearMeasure.Bootcamp.UI.Shared;
 using ClearMeasure.Bootcamp.UI.Shared.Components;
+using ClearMeasure.Bootcamp.UI.Shared.Models;
 using ClearMeasure.Bootcamp.UI.Shared.Pages;
 using Microsoft.EntityFrameworkCore;
 using Login = ClearMeasure.Bootcamp.UI.Shared.Pages.Login;
@@ -210,6 +211,17 @@ public class McpListWorkOrdersAcceptanceTests : AcceptanceTestBase
         await creatorSelect.SelectOptionAsync(creatorUsername ?? string.Empty);
         await assigneeSelect.SelectOptionAsync(assigneeUsername ?? string.Empty);
         await statusSelect.SelectOptionAsync(status ?? string.Empty);
+
+        // The page writes the filters into the URL only after their search has answered, so once the URL carries
+        // exactly these filters the rows on screen are theirs, not the previous filter's.
+        var expectedUri = (WorkOrderSearchUrlState.Default with
+        {
+            Creator = creatorUsername,
+            Assignee = assigneeUsername,
+            Status = status
+        }).ToRelativeUri();
+        await Expect(Page).ToHaveURLAsync(new System.Text.RegularExpressions.Regex(
+            System.Text.RegularExpressions.Regex.Escape(expectedUri) + "$"));
 
         // Results are paged (25 per page, #251): VisibleSearchNumbers walks every page, so required
         // numbers are checked against the whole filtered result rather than the first page.
