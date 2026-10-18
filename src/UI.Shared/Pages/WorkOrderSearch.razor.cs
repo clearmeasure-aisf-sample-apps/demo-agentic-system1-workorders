@@ -93,6 +93,8 @@ public partial class WorkOrderSearch : AppComponentBase
         StatusOptions = WorkOrderStatus.GetAllItems().Select(s => new SelectListItem(s.Key, s.FriendlyName)).ToList();
         // Who is signed in comes first: "Assigned to me" filters by it.
         _currentUserName = (await AuthStateProvider.GetAuthenticationStateAsync()).User.Identity?.Name;
+        // Search first: the results are what the page is for, and the lists and summary below can load after.
+        var initialSearch = ApplyStateAsync(WithSessionAssignedToMe(_lastUrlState!));
         var employees = await Bus.Send(new EmployeeGetAllQuery());
         UserOptions = employees.Select(e => new SelectListItem(e.UserName, e.GetFullName())).ToList();
         BuildingOptions = (await Bus.Send(new WorkOrderBuildingsQuery())).ToList();
@@ -100,10 +102,7 @@ public partial class WorkOrderSearch : AppComponentBase
         _currentUser = await UserSession.GetCurrentUserAsync();
         _canCreate = _currentUser?.CanCreateWorkOrder() == true;
         await LoadSummaryAsync();
-        if (_searchVersion == 0)
-        {
-            await ApplyStateAsync(WithSessionAssignedToMe(_lastUrlState));
-        }
+        await initialSearch;
     }
 
     protected override async Task OnParametersSetAsync()
