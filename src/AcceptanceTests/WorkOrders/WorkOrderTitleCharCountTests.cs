@@ -64,7 +64,9 @@ public class WorkOrderTitleCharCountTests : AcceptanceTestBase
     {
         await LoginAsCurrentUser();
 
-        await Click(nameof(NavMenu.Elements.NewWorkOrder));
+        // Straight to the form: these tests are about the title field, and the menu link can take more than a
+        // minute to show on a cold tdd environment (a timeout waiting for NewWorkOrder failed the suite).
+        await Page.GotoAsync("/workorder/manage?mode=New");
         await Page.WaitForURLAsync("**/workorder/manage?mode=New");
         await WaitForNewWorkOrderFormReadyAsync();
     }
