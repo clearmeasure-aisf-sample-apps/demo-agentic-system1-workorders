@@ -54,6 +54,17 @@ public class EmployeeWorkLoadQueryHandlerTests
         idleLoad.InProgress.ShouldBe(0);
         idleLoad.Overdue.ShouldBe(0);
         idleLoad.CompletedLast30Days.ShouldBe(0);
+
+        // The same loads, for every employee at once.
+        var loads = await new EmployeeWorkLoadsQueryHandler(TestHost.GetRequiredService<DataContext>(), TimeProvider.System)
+            .Handle(new EmployeeWorkLoadsQuery([ewlWorkerUserName, ewlIdleUserName, ewlWorkerUserName]));
+        loads.Count.ShouldBe(2);
+        loads[ewlWorkerUserName].AssignedAndOpen.ShouldBe(4);
+        loads[ewlWorkerUserName].InProgress.ShouldBe(2);
+        loads[ewlWorkerUserName].Overdue.ShouldBe(2);
+        loads[ewlWorkerUserName].CompletedLast30Days.ShouldBe(1);
+        loads[ewlIdleUserName].AssignedAndOpen.ShouldBe(0);
+        loads[ewlIdleUserName].CompletedLast30Days.ShouldBe(0);
     }
 
     private static WorkOrder NewOrder(string number, Employee creator, Employee? assignee,

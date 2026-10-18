@@ -16,7 +16,7 @@ public class EmployeeWorkLoadsQueryHandler(DataContext context, TimeProvider tim
 {
     public async Task<Dictionary<string, EmployeeWorkLoad>> Handle(EmployeeWorkLoadsQuery request, CancellationToken cancellationToken = default)
     {
-        var userNames = request.EmployeeUserNames.Distinct().ToArray();
+        var userNames = request.EmployeeUserNames.Distinct().ToList();
         var assigned = await context.Set<WorkOrder>()
             .Where(wo => wo.Assignee != null && userNames.Contains(wo.Assignee.UserName))
             .Select(wo => new { wo.Assignee!.UserName, wo.Status, wo.DueDate, wo.CompletedDate })
