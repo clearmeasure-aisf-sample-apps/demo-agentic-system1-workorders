@@ -89,8 +89,10 @@ public partial class Login : AppComponentBase
         {
             await AuthStateProvider!.Login(LoginModelValue.Username);
             EventBus.Notify(new UserLoggedInEvent(LoginModelValue.Username));
-            await Bus.Publish(new Core.Model.Events.UserLoggedInEvent(LoginModelValue.Username));
+            // Navigate before the server round trip: once signed in, the user may already be on the way elsewhere
+            // (global search), and a later redirect to the home page would take them back.
             NavigationManager!.NavigateTo("/");
+            await Bus.Publish(new Core.Model.Events.UserLoggedInEvent(LoginModelValue.Username));
         }
         else
         {

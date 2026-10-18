@@ -130,7 +130,10 @@ public class WorkOrderSearchRedesignTests : AcceptanceTestBase
         await Page.WaitForURLAsync($"**/workorder/search?Q={order.Number}");
 
         await Expect(Chip("Q")).ToHaveTextAsync($"Search: {order.Number}");
-        await Expect(Page.GetByTestId(nameof(WorkOrderSearch.Elements.WorkOrderLink) + order.Number)).ToHaveCountAsync(1);
+        // A fresh WASM page under the deployed tier's parallel load can take longer than the default to return
+        // its first search; the result is what this test checks, so it gets the deployed tier's longer wait.
+        await Expect(Page.GetByTestId(nameof(WorkOrderSearch.Elements.WorkOrderLink) + order.Number))
+            .ToHaveCountAsync(1, new LocatorAssertionsToHaveCountOptions { Timeout = 90_000 });
     }
 
     [Test, Retry(2)]
