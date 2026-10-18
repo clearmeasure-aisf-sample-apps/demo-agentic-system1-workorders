@@ -252,17 +252,15 @@
             .Where(e => e.CanFulfillWorkOrder())
             .ToList();
 
-        _tableData = new List<TeamTableRow>();
-
-        foreach (var employee in assignableEmployees)
-        {
-            var load = await Bus.Send(new EmployeeWorkLoadQuery(employee.UserName));
-            _tableData.Add(new TeamTableRow
+        // One request for every load: a request per employee took minutes once there were hundreds of them.
+        var loads = await Bus.Send(new EmployeeWorkLoadsQuery(assignableEmployees.Select(e => e.UserName).ToArray()));
+        _tableData = assignableEmployees
+            .Select(employee => new TeamTableRow
             {
                 Employee = employee,
-                Load = load
-            });
-        }
+                Load = loads.TryGetValue(employee.UserName, out var load) ? load : new EmployeeWorkLoad()
+            })
+            .ToList();
 
         SortTableData();
 

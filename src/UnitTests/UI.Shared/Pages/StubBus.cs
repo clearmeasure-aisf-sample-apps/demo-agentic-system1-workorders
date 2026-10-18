@@ -155,6 +155,12 @@ public class StubBus(WorkOrder[]? workOrderResults = null) : Bus(null!)
             return Task.FromResult<TResponse>((TResponse)(object)data);
         }
 
+        if (request is EmployeeWorkLoadsQuery loadsQuery)
+        {
+            var loads = loadsQuery.EmployeeUserNames.ToDictionary(n => n, _ => new EmployeeWorkLoad { AssignedAndOpen = 5, InProgress = 2, Overdue = 1, CompletedLast30Days = 10 });
+            return Task.FromResult<TResponse>((TResponse)(object)loads);
+        }
+
         if (request is EmployeeWorkLoadQuery)
         {
             var load = new EmployeeWorkLoad { AssignedAndOpen = 5, InProgress = 2, Overdue = 1, CompletedLast30Days = 10 };

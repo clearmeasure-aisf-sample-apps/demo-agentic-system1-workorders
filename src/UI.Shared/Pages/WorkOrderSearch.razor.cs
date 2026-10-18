@@ -87,10 +87,11 @@ public partial class WorkOrderSearch : AppComponentBase
     protected override async Task OnInitializedAsync()
     {
         StatusOptions = WorkOrderStatus.GetAllItems().Select(s => new SelectListItem(s.Key, s.FriendlyName)).ToList();
+        // Who is signed in comes first: "Assigned to me" filters by it.
+        _currentUserName = (await AuthStateProvider.GetAuthenticationStateAsync()).User.Identity?.Name;
         var employees = await Bus.Send(new EmployeeGetAllQuery());
         UserOptions = employees.Select(e => new SelectListItem(e.UserName, e.GetFullName())).ToList();
         BuildingOptions = (await Bus.Send(new WorkOrderBuildingsQuery())).ToList();
-        _currentUserName = (await AuthStateProvider.GetAuthenticationStateAsync()).User.Identity?.Name;
         await LoadUserViewsAsync();
         _currentUser = await UserSession.GetCurrentUserAsync();
         _canCreate = _currentUser?.CanCreateWorkOrder() == true;

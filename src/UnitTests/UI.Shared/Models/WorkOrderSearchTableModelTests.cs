@@ -84,6 +84,15 @@ public class WorkOrderSearchPagerTests
     }
 
     [Test]
+    public void GetPage_ManyPages_OffersFirstLastAndNeighbours()
+    {
+        var page = WorkOrderSearchPager.GetPage(Rows(1001), 20);
+
+        page.PageCount.ShouldBe(41);
+        page.PageNumbers.ShouldBe([1, 18, 19, 20, 21, 22, 41]);
+    }
+
+    [Test]
     public void GetPage_LastPartialPage()
     {
         var page = WorkOrderSearchPager.GetPage(Rows(60), 3);

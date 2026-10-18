@@ -3,6 +3,7 @@
 using System.Diagnostics;
 using System.Net;
 using ClearMeasure.Bootcamp.Core;
+using ClearMeasure.Bootcamp.DemoData;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClearMeasure.Bootcamp.AcceptanceTests;
@@ -530,6 +531,11 @@ public class ServerFixture
                 DataAccess.SqliteSchemaUpgrade.EnsureCreatedAndUpgraded(context);
             }
 
+            if (!StartLocalServer && !isSqlite)
+            {
+                PurgeEarlierTestData(context);
+            }
+
             new ZDataLoader().LoadData();
             TestContext.Out.WriteLine("ZDataLoader().LoadData(); - complete");
 
@@ -539,6 +545,31 @@ public class ServerFixture
 
             DatabaseInitialized = true;
         }
+    }
+
+    /// <summary>
+    /// A deployed environment keeps its database between runs, and every run adds its own employees, work orders,
+    /// teams and vendors. Kept, they grew to thousands of employees, and pages that list everyone outgrew the tests'
+    /// timeouts. Before the suite (no test is running yet) the deployed database is brought back to the demo data:
+    /// ZDataLoader adds it again right after.
+    /// </summary>
+    private static void PurgeEarlierTestData(DbContext context)
+    {
+        var demo = string.Join(", ", DemoEmployeeSeeder.UserNames.Select(n => $"'{n.Replace("'", "''")}'"));
+        context.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
+        var sql = $"""
+            DELETE FROM dbo.WorkOrderAttachment;
+            DELETE FROM dbo.WorkOrderStatusChange;
+            DELETE FROM dbo.SavedSearchView;
+            DELETE FROM dbo.TeamMember;
+            DELETE FROM dbo.Team;
+            DELETE FROM dbo.Vendor;
+            DELETE FROM dbo.WorkOrder;
+            DELETE er FROM dbo.EmployeeRoles er JOIN dbo.Employee e ON e.Id = er.EmployeeId WHERE e.UserName NOT IN ({demo});
+            DELETE FROM dbo.Employee WHERE UserName NOT IN ({demo});
+            """;
+        var deleted = context.Database.ExecuteSqlRaw(sql);
+        TestContext.Out.WriteLine($"Purged earlier test data from the deployed database ({deleted} rows)");
     }
 
     [OneTimeTearDown]

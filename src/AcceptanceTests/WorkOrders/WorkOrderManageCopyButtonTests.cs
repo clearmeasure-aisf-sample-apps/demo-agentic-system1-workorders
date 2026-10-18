@@ -35,9 +35,16 @@ public class WorkOrderManageCopyButtonTests : AcceptanceTestBase
         await Expect(copyButton).ToBeVisibleAsync();
 
         await Click(nameof(WorkOrderManage.Elements.CopyWorkOrderNumber));
-        await Task.Delay(500); // Allow JS to execute
 
-        var clipboardText = await Page.EvaluateAsync<string>("navigator.clipboard.readText()");
+        // The copy runs in a JavaScript module the page loads on first use: on a deployed app that takes longer than
+        // a fixed half second, so wait for the clipboard to hold the number (up to ten seconds).
+        var clipboardText = string.Empty;
+        for (var attempt = 0; attempt < 40 && clipboardText != order.Number; attempt++)
+        {
+            await Task.Delay(250);
+            clipboardText = await Page.EvaluateAsync<string>("navigator.clipboard.readText()");
+        }
+
         clipboardText.ShouldBe(order.Number);
     }
 
