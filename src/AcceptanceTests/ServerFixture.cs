@@ -531,7 +531,9 @@ public class ServerFixture
                 DataAccess.SqliteSchemaUpgrade.EnsureCreatedAndUpgraded(context);
             }
 
-            if (!StartLocalServer && !isSqlite)
+            // Read here: OneTimeSetUp sets StartLocalServer only after this runs.
+            var deployedRun = !TestHost.GetRequiredService<IConfiguration>().GetValue<bool>("StartLocalServer");
+            if (deployedRun && !isSqlite)
             {
                 PurgeEarlierTestData(context);
             }
