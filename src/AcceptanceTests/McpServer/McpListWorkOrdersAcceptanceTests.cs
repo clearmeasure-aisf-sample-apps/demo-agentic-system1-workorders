@@ -249,6 +249,9 @@ public class McpListWorkOrdersAcceptanceTests : AcceptanceTestBase
     {
         var numbers = new HashSet<string>();
         var next = Page.GetByTestId(nameof(WorkOrderSearch.Elements.PageNextButton));
+        // Every search this test reads has results; a page just (re)loaded shows none until its search answers,
+        // which on a deployed tier takes long enough to read an empty page.
+        await Expect(Page.Locator($"[data-testid^='{WorkOrderSearch.Elements.WorkOrderLink}']").First).ToBeVisibleAsync();
         numbers.UnionWith(await NumbersOnCurrentPage());
         while (await next.IsEnabledAsync())
         {
