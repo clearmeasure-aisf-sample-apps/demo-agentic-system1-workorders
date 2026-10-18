@@ -13,8 +13,12 @@ public sealed record SearchResultPage(WorkOrderSearchResultRow[] Rows, int Page,
     /// <summary>"N of M": rows on this page of the filtered total.</summary>
     public string CountText => string.Create(CultureInfo.InvariantCulture, $"{Rows.Length} of {Total}");
 
-    /// <summary>Page numbers 1..PageCount.</summary>
-    public IEnumerable<int> PageNumbers => Enumerable.Range(1, PageCount);
+    /// <summary>
+    /// The page numbers to offer: the first, the last, and the two either side of the current page. Every number
+    /// of a long result widened the page past the screen.
+    /// </summary>
+    public IEnumerable<int> PageNumbers => Enumerable.Range(1, PageCount)
+        .Where(n => n == 1 || n == PageCount || Math.Abs(n - Page) <= 2);
 
     public bool HasPrevious => Page > 1;
 

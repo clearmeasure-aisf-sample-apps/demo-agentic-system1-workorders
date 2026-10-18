@@ -97,6 +97,9 @@ public class DemoEmployeeSeeder
     /// Inserts the demo roles, employees and employee-role links that the database does not have yet, in one
     /// transaction. Roles are matched by name and employees by user name; existing rows are never changed.
     /// </summary>
+    /// <summary>The user names of the demo employees.</summary>
+    public static IReadOnlyCollection<string> UserNames => DemoEmployees.Select(e => e.UserName).ToArray();
+
     public static DemoEmployeeSeedResult Seed(DbContext context)
     {
         var roles = new Dictionary<string, Role>();

@@ -544,6 +544,13 @@ public class StubBusTeamsAndVendors : StubBus
             return Task.FromResult<TResponse>((TResponse)(object)EmployeesToReturn);
         }
 
+        if (request is EmployeeWorkLoadsQuery loadsQuery)
+        {
+            EmployeeWorkLoadQueriesSent.AddRange(loadsQuery.EmployeeUserNames.Select(n => new EmployeeWorkLoadQuery(n)));
+            var loads = loadsQuery.EmployeeUserNames.ToDictionary(n => n, _ => new EmployeeWorkLoad { AssignedAndOpen = 5, InProgress = 2, Overdue = 1, CompletedLast30Days = 10 });
+            return Task.FromResult<TResponse>((TResponse)(object)loads);
+        }
+
         if (request is EmployeeWorkLoadQuery workLoadQuery)
         {
             EmployeeWorkLoadQueriesSent.Add(workLoadQuery);
